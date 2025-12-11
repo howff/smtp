@@ -9,8 +9,8 @@ smtp_server = "localhost"
 login = "user@example.com"
 password = "secret123"
 
-sender_email = "jeskynar@gmail.com"
-receiver_email = "arb@sat.dundee.ac.uk"
+sender_email = "fake@example.com"
+receiver_email = "billgates@microsoft.com"
 
 # Plain text content
 text = """\
