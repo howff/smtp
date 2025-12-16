@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 
+import argparse
 import asyncio
 from aiosmtpd.controller import Controller
 from aiosmtpd.handlers import Message
 from aiosmtpd.smtp import AuthResult, LoginPassword
 from email.message import EmailMessage
+import os
 import ssl
+import sys
 import time
 
+hostname = ""
+hostport = 8587
 
 # ========== AUTHENTICATOR ==========
 class Authenticator:
@@ -32,6 +37,21 @@ class MailHandler():
 
 # ========== CONTROLLER ==========
 def main():
+    global hostname
+    global hostport
+
+    hostname = os.environ.get('SMTPHOST', hostname)
+    hostport = int(os.environ.get('SMTPPORT', str(hostport)))
+
+    parser = argparse.ArgumentParser(description='smtpserver')
+    parser.add_argument('--port', action="store", help='port on which to listen')
+    parser.add_argument('--host', action="store", help='network interface on which to listen')
+    args = parser.parse_args()
+    if args.port:
+        hostport = int(args.port)
+    if args.host:
+        hostname = args.host
+
     # SSL context for STARTTLE
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     context.load_cert_chain("server.pem", "server.key")  # your cert + key
@@ -40,8 +60,8 @@ def main():
 
     controller = Controller(
         handler = MailHandler(),
-        hostname="", # All interfaces
-        port=8587,
+        hostname=hostname,
+        port=hostport,
         auth_required=True,
         authenticator=Authenticator(),
         tls_context=context,
@@ -50,7 +70,7 @@ def main():
     )
 
     controller.start()
-    print("SMTP server with STARTTLS running on port 8587...")
+    print(f"SMTP server with STARTTLS running at host {hostname} on port {hostport}...")
     controller._thread.join()
 
     #try:
