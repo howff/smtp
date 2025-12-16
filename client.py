@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import smtplib
+import ssl
 from email.mime.text import MIMEText
 
 # Configuration
@@ -27,7 +28,7 @@ message["To"] = receiver_email
 
 # Send the email
 with smtplib.SMTP(smtp_server, port) as server:
-    server.starttls()  # Secure the connection
+    server.starttls(context = ssl.create_default_context())  # use None to disable cert checks
     server.login(login, password)
     server.sendmail(sender_email, receiver_email, message.as_string())
 
